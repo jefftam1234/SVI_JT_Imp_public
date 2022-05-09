@@ -30,3 +30,9 @@ def retrieve_initial_svi_param_dict(timestamp):
     with open(f'{timestamp}/svi_param_initial.json', 'r') as f:
         svi_param_initial = json.load(f)
     return svi_param_initial
+
+
+def retrieve_calibration_hyperparameters():
+    with open(f'calib_hyperparameter.json', 'r') as f:
+        hyperparameters = json.load(f)
+    return hyperparameters

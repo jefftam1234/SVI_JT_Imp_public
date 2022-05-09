@@ -94,12 +94,12 @@ def solve_grad_get_score(S_M, x_vT):
     return solve_grad(S, M, x, vT)[3]
 
 def calibrate(df):
-    vT = df.IMPLIEDVOL * df.IMPLIEDVOL * df.t
+    vT = df.IMPLIEDVOL * df.IMPLIEDVOL * df.tau
     res = optimize.minimize(solve_grad_get_score, [.1, .0], args=[df.MONEYNESS, vT], bounds=[(0.001, None), (None, None)])
     assert res.success
     S, M = res.x
     a, d, c, _ = solve_grad(S, M, df.MONEYNESS, vT)
-    T = df.t.max() # should be the same for all rows
+    T = df.tau.max() # should be the same for all rows
     A, P, B = a / T, d / c, c / (S * T)
     # assert T >= 0 and S >= 0 and abs(P) <= 1
     return A, P, B, S, M
@@ -133,3 +133,9 @@ def bsdelta(moneyness, vol, maturity, opt_type):
         return 1 - norm.cdf(d1)
     else:
         raise ValueError(f"Unknown option type: {opt_type}")
+
+
+def moneyness_func(options, futures, strike, t_mat):
+    S0 = options.Spot.iloc[0]
+    imp_r = np.interp(t_mat, futures.t, futures.imp_r)
+    return np.log(strike / (S0 * np.exp(imp_r * t_mat)))
